@@ -1,13 +1,13 @@
-package com.example;
+package es.weedl;
 
 import net.runelite.client.RuneLite;
 import net.runelite.client.externalplugins.ExternalPluginManager;
 
-public class ExamplePluginTest
+public class FuckHelmiesPluginTest
 {
 	public static void main(String[] args) throws Exception
 	{
-		ExternalPluginManager.loadBuiltin(ExamplePlugin.class);
+		ExternalPluginManager.loadBuiltin(FuckHelmiesPlugin.class);
 		RuneLite.main(args);
 	}
 }
