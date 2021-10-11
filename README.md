@@ -1,6 +1,6 @@
-# Fuck Helmies
+# Account Chat Filter
 This plugin adds the ability to filter chat and overhead messages from the following account types:
-- Normal account ("bondies")
+- Normal accounts
 - Ironmen
 - Hardcore ironmen
 - Ultimate ironmen

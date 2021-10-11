@@ -19,54 +19,54 @@ import java.util.Set;
 
 @Slf4j
 @PluginDescriptor(
-	name = "Fuck Helmies"
+	name = "Account Chat Filter"
 )
-public class FuckHelmiesPlugin extends Plugin
+public class AccountChatFilterPlugin extends Plugin
 {
 	@Inject
 	private Client client;
 
 	@Inject
-	private FuckHelmiesConfig config;
+	private AccountChatFilterConfig config;
 
-	private Set<HelmieIconID> filteredHelmies = new HashSet<>();
+	private Set<AccountIconID> filteredAccountTypes = new HashSet<>();
 
 	@Provides
-	final FuckHelmiesConfig provideConfig(ConfigManager configManager)
+	final AccountChatFilterConfig provideConfig(ConfigManager configManager)
 	{
-		return configManager.getConfig(FuckHelmiesConfig.class);
+		return configManager.getConfig(AccountChatFilterConfig.class);
 	}
 
-	private void addOrRemove(final HelmieIconID helmieIconID, final boolean isAdd)
+	private void addOrRemove(final AccountIconID accountIconID, final boolean isAdd)
 	{
 		if (isAdd)
 		{
-			filteredHelmies.add(helmieIconID);
+			filteredAccountTypes.add(accountIconID);
 		}
 		else
 		{
-			filteredHelmies.remove(helmieIconID);
+			filteredAccountTypes.remove(accountIconID);
 		}
 	}
 
-	private void updateFilteredHelmies()
+	private void updateFilteredAccounts()
 	{
-		addOrRemove(HelmieIconID.IRONMAN, config.filterIronmen());
-		addOrRemove(HelmieIconID.HARDCORE_IRONMAN, config.filterHardcoreIronmen());
-		addOrRemove(HelmieIconID.ULTIMATE_IRONMAN, config.filterUltimateIronmen());
-		addOrRemove(HelmieIconID.GROUP_IRONMAN, config.filterGroupIronmen());
-		addOrRemove(HelmieIconID.HARDCORE_GROUP_IRONMAN, config.filterHardcoreGroupIronmen());
+		addOrRemove(AccountIconID.IRONMAN, config.filterIronmen());
+		addOrRemove(AccountIconID.HARDCORE_IRONMAN, config.filterHardcoreIronmen());
+		addOrRemove(AccountIconID.ULTIMATE_IRONMAN, config.filterUltimateIronmen());
+		addOrRemove(AccountIconID.GROUP_IRONMAN, config.filterGroupIronmen());
+		addOrRemove(AccountIconID.HARDCORE_GROUP_IRONMAN, config.filterHardcoreGroupIronmen());
 	}
 
 	@Subscribe
 	public void onConfigChanged(final ConfigChanged event)
 	{
-		if (!"fuckHelmies".equals(event.getGroup()))
+		if (!"accountChatFilter".equals(event.getGroup()))
 		{
 			return;
 		}
 
-		updateFilteredHelmies();
+		updateFilteredAccounts();
 
 		//Refresh chat after config change to reflect current rules
 		client.refreshChat();
@@ -149,19 +149,19 @@ public class FuckHelmiesPlugin extends Plugin
 			return false;
 		}
 
-		boolean isFilteredHelmie = filteredHelmies.stream().anyMatch(
-				(helmieIconID -> name.contains(helmieIconID.toString()))
+		boolean isFilteredAccountType = filteredAccountTypes.stream().anyMatch(
+				(accountIconID -> name.contains(accountIconID.toString()))
 		);
 
-		if (isFilteredHelmie)
+		if (isFilteredAccountType)
 		{
 			return true;
 		}
 
-		if (config.filterBondies())
+		if (config.filterNormalAccounts())
 		{
-			return Arrays.stream(HelmieIconID.values()).noneMatch(
-					(helmieIconID -> name.contains(helmieIconID.toString()))
+			return Arrays.stream(AccountIconID.values()).noneMatch(
+					(accountIconID -> name.contains(accountIconID.toString()))
 			);
 		}
 

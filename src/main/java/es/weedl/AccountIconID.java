@@ -6,7 +6,7 @@ import net.runelite.api.IconID;
 
 @RequiredArgsConstructor
 @Getter
-public enum HelmieIconID {
+public enum AccountIconID {
     IRONMAN(IconID.IRONMAN.getIndex()),
     ULTIMATE_IRONMAN(IconID.ULTIMATE_IRONMAN.getIndex()),
     HARDCORE_IRONMAN(IconID.HARDCORE_IRONMAN.getIndex()),

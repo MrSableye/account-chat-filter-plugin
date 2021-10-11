@@ -4,16 +4,16 @@ import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
-@ConfigGroup("fuckHelmies")
-public interface FuckHelmiesConfig extends Config
+@ConfigGroup("accountChatFilter")
+public interface AccountChatFilterConfig extends Config
 {
 	@ConfigItem(
-		keyName = "filterBondies",
-		name = "Filter Bondies",
+		keyName = "filterNormalAccounts",
+		name = "Filter Normal Accounts",
 		description = "Filters normal accounts",
 		position = 0
 	)
-	default boolean filterBondies() { return false; }
+	default boolean filterNormalAccounts() { return false; }
 
 	@ConfigItem(
 		keyName = "filterIronmen",
