@@ -4,8 +4,12 @@ This plugin adds the ability to filter chat and overhead messages from the follo
 - Ironmen
 - Hardcore ironmen
 - Ultimate ironmen
-- Group ironment
+- Group ironmen
 - Hardcore group ironmen
+- League accounts
 
-## Usage
-Enable the plugin and select the accounts you want to filter. Your own messages and the messages of your friends will not be filtered.
+These filters can be enabled or disabled for:
+- Yourself (default: filters disabled)
+- Friends (default: filters disabled)
+- Current friend chat members (default: filters enabled)
+- Current clan chat members (default: filters enabled)

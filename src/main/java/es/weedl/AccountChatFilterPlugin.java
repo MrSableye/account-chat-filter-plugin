@@ -4,6 +4,7 @@ import com.google.inject.Provides;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
+import net.runelite.api.clan.ClanChannel;
 import net.runelite.api.events.OverheadTextChanged;
 import net.runelite.api.events.ScriptCallbackEvent;
 import net.runelite.client.config.ConfigManager;
@@ -29,7 +30,7 @@ public class AccountChatFilterPlugin extends Plugin
 	@Inject
 	private AccountChatFilterConfig config;
 
-	private Set<AccountIconID> filteredAccountTypes = new HashSet<>();
+	private final Set<AccountIconID> filteredAccountTypes = new HashSet<>();
 
 	@Provides
 	final AccountChatFilterConfig provideConfig(ConfigManager configManager)
@@ -56,6 +57,7 @@ public class AccountChatFilterPlugin extends Plugin
 		addOrRemove(AccountIconID.ULTIMATE_IRONMAN, config.filterUltimateIronmen());
 		addOrRemove(AccountIconID.GROUP_IRONMAN, config.filterGroupIronmen());
 		addOrRemove(AccountIconID.HARDCORE_GROUP_IRONMAN, config.filterHardcoreGroupIronmen());
+		addOrRemove(AccountIconID.LEAGUE, config.filterLeague());
 	}
 
 	@Subscribe
@@ -92,6 +94,14 @@ public class AccountChatFilterPlugin extends Plugin
 		final String name = messageNode.getName();
 		boolean blockMessage = false;
 
+		boolean shouldFilter = shouldFilter(name);
+
+		if (shouldFilter && config.onlyFilterIcons())
+		{
+			messageNode.setName(filterIcons(name));
+			return;
+		}
+
 		// Only filter public chat and private messages
 		switch (chatMessageType)
 		{
@@ -103,7 +113,7 @@ public class AccountChatFilterPlugin extends Plugin
 			case FRIENDSCHAT:
 			case CLAN_CHAT:
 			case CLAN_GUEST_CHAT:
-				blockMessage = shouldFilter(name);
+				blockMessage = shouldFilter;
 				break;
 		}
 
@@ -132,39 +142,88 @@ public class AccountChatFilterPlugin extends Plugin
 		event.getActor().setOverheadText(message);
 	}
 
-	private boolean shouldSkipFilters(final String name)
+	private String filterIcons(final String name)
 	{
-		if (Text.standardize(name).equals(Text.standardize(client.getLocalPlayer().getName())))
+		String filteredName = name;
+		for (final AccountIconID accountIconID : filteredAccountTypes)
+		{
+			filteredName = filteredName.replace(accountIconID.toString(), "");
+		}
+		return filteredName;
+	}
+
+	private boolean isSelf(final String name)
+	{
+		return Text.standardize(name).equals(Text.standardize(client.getLocalPlayer().getName()));
+	}
+
+	private boolean isFriend(final String name)
+	{
+		return client.isFriended(name, false);
+	}
+
+	private boolean isFriendsChatMember(final String name)
+	{
+		final FriendsChatManager friendsChatManager = client.getFriendsChatManager();
+		return friendsChatManager != null && friendsChatManager.findByName(name) != null;
+	}
+
+	private boolean isClanChatMember(final String name)
+	{
+		ClanChannel clanChannel = client.getClanChannel();
+		if (clanChannel != null && clanChannel.findMember(name) != null)
 		{
 			return true;
 		}
 
-		return client.isFriended(Text.toJagexName(name), false);
+		clanChannel = client.getGuestClanChannel();
+		return clanChannel != null && clanChannel.findMember(name) != null;
+	}
+
+	private boolean shouldSkipFilters(final String name)
+	{
+		if (config.filterSelf() && isSelf(name))
+		{
+			return true;
+		}
+		else if (config.filterFriends() && isFriend(name))
+		{
+			return true;
+		}
+		else if (config.filterFriendsChat() && isFriendsChatMember(name))
+		{
+			return true;
+		}
+
+		return config.filterClanChat() && isClanChatMember(name);
+	}
+
+	private boolean isFilteredAccountType(final String name)
+	{
+		return filteredAccountTypes.stream().anyMatch(
+				(accountIconID -> name.contains(accountIconID.toString()))
+		);
+	}
+
+	private boolean isNormalAccount(final String name)
+	{
+		return Arrays.stream(AccountIconID.values()).noneMatch(
+				(accountIconID -> name.contains(accountIconID.toString()))
+		);
 	}
 
 	private boolean shouldFilter(final String name)
 	{
-		if (shouldSkipFilters(name))
+		if (shouldSkipFilters(Text.removeTags(name)))
 		{
 			return false;
 		}
 
-		boolean isFilteredAccountType = filteredAccountTypes.stream().anyMatch(
-				(accountIconID -> name.contains(accountIconID.toString()))
-		);
-
-		if (isFilteredAccountType)
+		if (isFilteredAccountType(name))
 		{
 			return true;
 		}
 
-		if (config.filterNormalAccounts())
-		{
-			return Arrays.stream(AccountIconID.values()).noneMatch(
-					(accountIconID -> name.contains(accountIconID.toString()))
-			);
-		}
-
-		return false;
+		return config.filterNormalAccounts() && isNormalAccount(name);
 	}
 }

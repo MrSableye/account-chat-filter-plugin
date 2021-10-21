@@ -11,7 +11,8 @@ public enum AccountIconID {
     ULTIMATE_IRONMAN(IconID.ULTIMATE_IRONMAN.getIndex()),
     HARDCORE_IRONMAN(IconID.HARDCORE_IRONMAN.getIndex()),
     GROUP_IRONMAN(41),
-    HARDCORE_GROUP_IRONMAN(42);
+    HARDCORE_GROUP_IRONMAN(42),
+    LEAGUE(IconID.LEAGUE.getIndex());
 
     private final int index;
 
