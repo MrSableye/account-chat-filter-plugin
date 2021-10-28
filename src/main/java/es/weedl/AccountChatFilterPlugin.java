@@ -1,6 +1,7 @@
 package es.weedl;
 
 import com.google.inject.Provides;
+import java.util.*;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
@@ -13,10 +14,6 @@ import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.util.Text;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 @Slf4j
 @PluginDescriptor(
@@ -31,6 +28,8 @@ public class AccountChatFilterPlugin extends Plugin
 	private AccountChatFilterConfig config;
 
 	private final Set<AccountIconID> filteredAccountTypes = new HashSet<>();
+
+	private final Map<Integer, String> originalNames = new HashMap<>();
 
 	@Provides
 	final AccountChatFilterConfig provideConfig(ConfigManager configManager)
@@ -50,7 +49,7 @@ public class AccountChatFilterPlugin extends Plugin
 		}
 	}
 
-	private void updateFilteredAccounts()
+	protected void updateFilteredAccounts()
 	{
 		addOrRemove(AccountIconID.IRONMAN, config.filterIronmen());
 		addOrRemove(AccountIconID.HARDCORE_IRONMAN, config.filterHardcoreIronmen());
@@ -90,20 +89,39 @@ public class AccountChatFilterPlugin extends Plugin
 
 		final ChatMessageType chatMessageType = ChatMessageType.of(messageType);
 		final MessageNode messageNode = client.getMessages().get(messageId);
-		final String name = messageNode.getName();
-		boolean blockMessage = false;
+		final String name = originalNames.getOrDefault(messageId, messageNode.getName());
 
 		boolean shouldFilter = shouldFilter(name);
 
-		if (shouldFilter && config.onlyFilterIcons())
+		if (shouldFilter)
 		{
-			messageNode.setName(filterIcons(name));
-			return;
-		}
+			if (config.onlyFilterIcons())
+			{
+				originalNames.put(messageId, name);
+				messageNode.setName(filterIcons(name));
+				client.refreshChat();
+			}
+			else
+			{
+				boolean blockMessage = isBlockableMessageType(chatMessageType);
 
-		// Only filter public chat and private messages
-		switch (chatMessageType)
+				if (blockMessage)
+				{
+					// Block the message
+					intStack[intStackSize - 3] = 0;
+				}
+			}
+		}
+		else if (originalNames.containsKey(messageId))
 		{
+			messageNode.setName(originalNames.remove(messageId));
+			client.refreshChat();
+		}
+	}
+
+	private boolean isBlockableMessageType(final ChatMessageType chatMessageType)
+	{
+		switch (chatMessageType) {
 			case PUBLICCHAT:
 			case MODCHAT:
 			case AUTOTYPER:
@@ -112,15 +130,10 @@ public class AccountChatFilterPlugin extends Plugin
 			case FRIENDSCHAT:
 			case CLAN_CHAT:
 			case CLAN_GUEST_CHAT:
-				blockMessage = shouldFilter;
-				break;
+				return true;
 		}
 
-		if (blockMessage)
-		{
-			// Block the message
-			intStack[intStackSize - 3] = 0;
-		}
+		return false;
 	}
 
 	@Subscribe
@@ -141,7 +154,7 @@ public class AccountChatFilterPlugin extends Plugin
 		event.getActor().setOverheadText(message);
 	}
 
-	private String filterIcons(final String name)
+	protected String filterIcons(final String name)
 	{
 		String filteredName = name;
 		for (final AccountIconID accountIconID : filteredAccountTypes)
@@ -181,20 +194,24 @@ public class AccountChatFilterPlugin extends Plugin
 
 	private boolean shouldSkipFilters(final String name)
 	{
-		if (config.filterSelf() && isSelf(name))
+		if (!config.filterSelf() && isSelf(name))
 		{
-			return false;
+			return true;
 		}
-		else if (config.filterFriends() && isFriend(name))
+		else if (!config.filterFriends() && isFriend(name))
 		{
-			return false;
+			return true;
 		}
-		else if (config.filterFriendsChat() && isFriendsChatMember(name))
+		else if (!config.filterFriendsChat() && isFriendsChatMember(name))
 		{
-			return false;
+			return true;
+		}
+		else if (!config.filterClanChat() && isClanChatMember(name))
+		{
+			return true;
 		}
 
-		return !(config.filterClanChat() && isClanChatMember(name));
+		return false;
 	}
 
 	private boolean isFilteredAccountType(final String name)
@@ -211,7 +228,7 @@ public class AccountChatFilterPlugin extends Plugin
 		);
 	}
 
-	private boolean shouldFilter(final String name)
+	protected boolean shouldFilter(final String name)
 	{
 		if (shouldSkipFilters(Text.removeTags(name)))
 		{
