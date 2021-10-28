@@ -61,7 +61,7 @@ public interface AccountChatFilterConfig extends Config
 	@ConfigItem(
 			keyName = "onlyFilterIcons",
 			name = "Only Filter Icons",
-			description = "Removes the specified account icons instead of the user's message (toggling will not re-add icons)",
+			description = "Removes the specified account icons instead of the user's message (toggling will not re-add icons, this is somewhat buggy)",
 			position = 4,
 			section = generalSection
 	)

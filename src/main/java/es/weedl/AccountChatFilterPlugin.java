@@ -74,7 +74,6 @@ public class AccountChatFilterPlugin extends Plugin
 		client.refreshChat();
 	}
 
-
 	@Subscribe
 	public void onScriptCallbackEvent(final ScriptCallbackEvent event)
 	{
@@ -184,18 +183,18 @@ public class AccountChatFilterPlugin extends Plugin
 	{
 		if (config.filterSelf() && isSelf(name))
 		{
-			return true;
+			return false;
 		}
 		else if (config.filterFriends() && isFriend(name))
 		{
-			return true;
+			return false;
 		}
 		else if (config.filterFriendsChat() && isFriendsChatMember(name))
 		{
-			return true;
+			return false;
 		}
 
-		return config.filterClanChat() && isClanChatMember(name);
+		return !(config.filterClanChat() && isClanChatMember(name));
 	}
 
 	private boolean isFilteredAccountType(final String name)
