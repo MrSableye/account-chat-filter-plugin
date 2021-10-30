@@ -69,8 +69,23 @@ public class AccountChatFilterPlugin extends Plugin
 
 		updateFilteredAccounts();
 
+		if (!config.onlyFilterIcons())
+		{
+			resetNames();
+		}
+
 		//Refresh chat after config change to reflect current rules
 		client.refreshChat();
+	}
+
+	private void resetNames()
+	{
+		for (final Integer messageId : originalNames.keySet())
+		{
+			final String originalName = originalNames.get(messageId);
+			final MessageNode messageNode = client.getMessages().get(messageId);
+			messageNode.setName(originalName);
+		}
 	}
 
 	@Subscribe

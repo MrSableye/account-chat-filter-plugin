@@ -214,10 +214,4 @@ public class AccountChatFilterPluginTest
 	{
 		return accountIconID + " " + playerName;
 	}
-
-	public static void main(String[] args) throws Exception
-	{
-		ExternalPluginManager.loadBuiltin(AccountChatFilterPlugin.class);
-		RuneLite.main(args);
-	}
 }
