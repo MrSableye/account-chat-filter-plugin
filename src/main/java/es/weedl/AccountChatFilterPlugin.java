@@ -59,6 +59,22 @@ public class AccountChatFilterPlugin extends Plugin
 		addOrRemove(AccountIconID.LEAGUE, config.filterLeague());
 	}
 
+	private void resetNames()
+	{
+		for (final Integer messageId : originalNames.keySet())
+		{
+			final String originalName = originalNames.get(messageId);
+			final MessageNode messageNode = client.getMessages().get(messageId);
+			messageNode.setName(originalName);
+		}
+	}
+
+	@Override
+	protected void startUp() throws Exception
+	{
+		handleChange();
+	}
+
 	@Subscribe
 	public void onConfigChanged(final ConfigChanged event)
 	{
@@ -67,6 +83,11 @@ public class AccountChatFilterPlugin extends Plugin
 			return;
 		}
 
+		handleChange();
+	}
+
+	private void handleChange()
+	{
 		updateFilteredAccounts();
 
 		if (!config.onlyFilterIcons())
@@ -76,16 +97,6 @@ public class AccountChatFilterPlugin extends Plugin
 
 		//Refresh chat after config change to reflect current rules
 		client.refreshChat();
-	}
-
-	private void resetNames()
-	{
-		for (final Integer messageId : originalNames.keySet())
-		{
-			final String originalName = originalNames.get(messageId);
-			final MessageNode messageNode = client.getMessages().get(messageId);
-			messageNode.setName(originalName);
-		}
 	}
 
 	@Subscribe
