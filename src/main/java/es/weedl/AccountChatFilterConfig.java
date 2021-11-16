@@ -129,4 +129,12 @@ public interface AccountChatFilterConfig extends Config
 			section = accountTypesSection
 	)
 	default boolean filterLeague() { return false; }
+
+	@ConfigItem(
+			keyName = "filteredCombatLevel",
+			name = "Combat Level",
+			description = "Filters chat based on combat level given",
+			position = 27
+	)
+	default int filteredCombatLevel() { return 1; }
 }
