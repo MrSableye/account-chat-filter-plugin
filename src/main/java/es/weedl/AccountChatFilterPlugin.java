@@ -266,6 +266,25 @@ public class AccountChatFilterPlugin extends Plugin
 			return true;
 		}
 
+		Player player = getPlayerFromName(name);
+		if (player != null && player.getCombatLevel() <= config.filteredCombatLevel()) {
+			return true;
+		}
+
 		return config.filterNormalAccounts() && isNormalAccount(name);
+	}
+
+	private Player getPlayerFromName(String playerName) {
+		String sanitizedName = Text.standardize(playerName);
+
+		Player player = null;
+		for (Player p : client.getPlayers()) {
+			if (p.getName().toLowerCase().equals(sanitizedName)) {
+				player = p;
+				break;
+			}
+		}
+
+		return player;
 	}
 }
