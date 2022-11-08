@@ -122,10 +122,19 @@ public interface AccountChatFilterConfig extends Config
 	default boolean filterHardcoreGroupIronmen() { return false; }
 
 	@ConfigItem(
+			keyName = "filterUnrankedGroupIronmen",
+			name = "Unranked Group Ironmen",
+			description = "Filters unranked group ironman accounts",
+			position = 26,
+			section = accountTypesSection
+	)
+	default boolean filterUnrankedGroupIronmen() { return false; }
+
+	@ConfigItem(
 			keyName = "filterLeagueAccount",
 			name = "League Accounts",
 			description = "Filters league accounts",
-			position = 26,
+			position = 27,
 			section = accountTypesSection
 	)
 	default boolean filterLeague() { return false; }
@@ -134,7 +143,7 @@ public interface AccountChatFilterConfig extends Config
 			keyName = "filteredCombatLevel",
 			name = "Combat Level",
 			description = "Filters chat based on combat level given",
-			position = 27
+			position = 28
 	)
 	default int filteredCombatLevel() { return 1; }
 }

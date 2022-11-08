@@ -56,6 +56,7 @@ public class AccountChatFilterPlugin extends Plugin
 		addOrRemove(AccountIconID.ULTIMATE_IRONMAN, config.filterUltimateIronmen());
 		addOrRemove(AccountIconID.GROUP_IRONMAN, config.filterGroupIronmen());
 		addOrRemove(AccountIconID.HARDCORE_GROUP_IRONMAN, config.filterHardcoreGroupIronmen());
+		addOrRemove(AccountIconID.UNRANKED_GROUP_IRONMAN, config.filterUnrankedGroupIronmen());
 		addOrRemove(AccountIconID.LEAGUE, config.filterLeague());
 	}
 
