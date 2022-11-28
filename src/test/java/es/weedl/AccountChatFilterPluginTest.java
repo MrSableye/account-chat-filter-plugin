@@ -105,6 +105,16 @@ public class AccountChatFilterPluginTest
 	}
 
 	@Test
+	public void filtersUnrankedGroupIronmenWhenEnabled()
+	{
+		mockLocalPlayer(TEST_ACCOUNT_NAME_2);
+		when(accountChatFilterConfig.filterUnrankedGroupIronmen()).thenReturn(true);
+		accountChatFilterPlugin.updateFilteredAccounts();
+
+		assertTrue(accountChatFilterPlugin.shouldFilter(getTestName(AccountIconID.UNRANKED_GROUP_IRONMAN, TEST_ACCOUNT_NAME_1)));
+	}
+
+	@Test
 	public void filtersLeagueAccountWhenEnabled()
 	{
 		mockLocalPlayer(TEST_ACCOUNT_NAME_2);
