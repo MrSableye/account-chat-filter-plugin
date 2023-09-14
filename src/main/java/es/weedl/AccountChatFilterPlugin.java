@@ -8,6 +8,7 @@ import net.runelite.api.*;
 import net.runelite.api.clan.ClanChannel;
 import net.runelite.api.events.OverheadTextChanged;
 import net.runelite.api.events.ScriptCallbackEvent;
+import net.runelite.client.callback.Hooks;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
@@ -27,9 +28,15 @@ public class AccountChatFilterPlugin extends Plugin
 	@Inject
 	private AccountChatFilterConfig config;
 
+	@Inject
+	private Hooks hooks;
+
 	private final Set<AccountIconID> filteredAccountTypes = new HashSet<>();
 
 	private final Map<Integer, String> originalNames = new HashMap<>();
+	private final Set<String> filteredAccountNames = new HashSet<>();
+
+	private final Hooks.RenderableDrawListener drawListener = this::shouldDraw;
 
 	@Provides
 	final AccountChatFilterConfig provideConfig(ConfigManager configManager)
@@ -74,6 +81,13 @@ public class AccountChatFilterPlugin extends Plugin
 	protected void startUp() throws Exception
 	{
 		handleChange();
+		hooks.registerRenderableDrawListener(drawListener);
+	}
+
+	@Override
+	protected void shutDown()
+	{
+		hooks.unregisterRenderableDrawListener(drawListener);
 	}
 
 	@Subscribe
@@ -95,6 +109,8 @@ public class AccountChatFilterPlugin extends Plugin
 		{
 			resetNames();
 		}
+
+		filteredAccountNames.clear();
 
 		//Refresh chat after config change to reflect current rules
 		client.refreshChat();
@@ -122,6 +138,8 @@ public class AccountChatFilterPlugin extends Plugin
 
 		if (shouldFilter)
 		{
+			filteredAccountNames.add(Text.standardize(name));
+
 			if (config.onlyFilterIcons())
 			{
 				originalNames.put(messageId, name);
@@ -273,6 +291,20 @@ public class AccountChatFilterPlugin extends Plugin
 		}
 
 		return config.filterNormalAccounts() && isNormalAccount(name);
+	}
+
+	boolean shouldDraw(Renderable renderable, boolean drawingUI)
+	{
+		if (!config.hideCharacterModels()) return true;
+
+		if (renderable instanceof Player)
+		{
+			Player player = (Player) renderable;
+			String name = player.getName();
+			return name != null && !filteredAccountNames.contains(Text.standardize(name));
+		}
+
+		return true;
 	}
 
 	private Player getPlayerFromName(String playerName) {

@@ -146,4 +146,12 @@ public interface AccountChatFilterConfig extends Config
 			position = 28
 	)
 	default int filteredCombatLevel() { return 1; }
+
+	@ConfigItem(
+			keyName = "hideCharacterModels",
+			name = "Hide Character Models",
+			description = "Hides the in-game character model of any filtered players",
+			position = 29
+	)
+	default boolean hideCharacterModels() { return false; }
 }
